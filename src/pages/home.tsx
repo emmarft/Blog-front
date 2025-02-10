@@ -3,12 +3,42 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { articles } from '@/data/articles';
+import { Article } from '@/data/articles';
 import { ArrowRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 export function Home() {
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/articles');
+        
+        // Vérification et assignation d'une catégorie par défaut
+        const validArticles = response.data.map((article: Article) => ({
+          ...article,
+          category: article.category || { name: 'Catégorie inconnue' },
+        }));
+
+        setArticles(validArticles);
+      } catch (err) {
+        setError("Erreur lors du chargement des articles.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticles();
+  }, []);
+
+  if (loading) return <div>Chargement...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
+
   const featuredArticles = articles.slice(0, 3);
-  const categories = ['Beauté', 'Lifestyle', 'Nutrition', 'Mode', 'Bien-être', 'Décoration'];
 
   return (
     <>
@@ -31,7 +61,6 @@ export function Home() {
             </h1>
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
               Découvrez nos conseils et astuces pour une vie plus épanouie.
-              Des articles soigneusement sélectionnés pour vous inspirer au quotidien.
             </p>
             <Link to="/articles">
               <Button size="lg" className="rounded-full">
@@ -58,13 +87,13 @@ export function Home() {
                 <Link to={`/article/${article.id}`}>
                   <Card className="h-full hover:shadow-lg transition-shadow duration-300">
                     <img
-                      src={article.image}
+                      src={article.image_url}
                       alt={article.title}
                       className="w-full h-48 object-cover"
                     />
                     <CardContent className="p-6">
                       <div className="text-sm font-medium text-primary-foreground mb-2">
-                        {article.category}
+                        {article.category?.name || 'Catégorie inconnue'}
                       </div>
                       <h3 className="text-xl font-playfair font-semibold mb-2">
                         {article.title}
@@ -76,50 +105,6 @@ export function Home() {
               </motion.div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Categories Preview */}
-      <section className="bg-accent/20 py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-playfair font-bold mb-8 text-center">
-            Explorez nos catégories
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {categories.map((category) => (
-              <Link key={category} to="/categories">
-                <Card className="text-center hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                  <CardContent className="p-6">
-                    <h3 className="font-medium">{category}</h3>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Newsletter */}
-      <section className="py-16">
-        <div className="container mx-auto px-4 max-w-2xl">
-          <Card className="bg-primary/5">
-            <CardContent className="p-8 text-center">
-              <h2 className="text-2xl font-playfair font-bold mb-4">
-                Restez inspiré(e)
-              </h2>
-              <p className="text-muted-foreground mb-6">
-                Inscrivez-vous à notre newsletter pour recevoir nos meilleurs conseils
-              </p>
-              <div className="flex gap-4 max-w-md mx-auto">
-                <input
-                  type="email"
-                  placeholder="votre@email.com"
-                  className="flex-1 px-4 py-2 rounded-full border focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-                <Button className="rounded-full">S'inscrire</Button>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </section>
     </>

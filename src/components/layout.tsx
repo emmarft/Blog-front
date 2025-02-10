@@ -16,7 +16,6 @@ export function Layout() {
       >
         <Outlet />
       </motion.main>
-      <Footer />
     </div>
   );
 }

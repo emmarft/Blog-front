@@ -1,30 +1,72 @@
-import { Helmet } from 'react-helmet-async';
-import { useState } from 'react';
-import { articles } from '../data/articles';
-import { ArticleCard } from '../components/article-card';
-import Masonry from 'react-masonry-css';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Helmet } from "react-helmet-async";
+import { useEffect, useState, useMemo } from "react";
+import { ArticleCard } from "../components/article-card";
+import Masonry from "react-masonry-css";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Article } from "@/data/articles";
+import axios from "axios";
 
 export function Articles() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [articles, setArticles] = useState<Article[]>([]);
 
-  const categories = Array.from(new Set(articles.map(article => article.category)));
+  // Fonction pour récupérer les articles
+  const fetchArticles = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/articles");
 
-  const filteredArticles = articles.filter(article => {
-    const matchesCategory = !selectedCategory || article.category === selectedCategory;
-    const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         article.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+      if (Array.isArray(response.data)) {
+        const formattedArticles = response.data.map((article: any) => ({
+          ...article,
+          category: article.Category || { id: null, name: "Catégorie inconnue" },
+        }));
+        setArticles(formattedArticles);
+      } else {
+        throw new Error("Format des données invalide");
+      }
+    } catch (err) {
+      console.error("Erreur lors du chargement des articles :", err);
+      setError("Impossible de charger les articles.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
+    fetchArticles();
+  }, []);
+
+  // Création d'une liste unique des catégories
+  const categories = useMemo(() => {
+    const categoryMap = new Map<number, string>();
+    articles.forEach((article) => {
+      if (article.category?.id && article.category?.name) {
+        categoryMap.set(article.category.id, article.category.name);
+      }
+    });
+    return Array.from(categoryMap.entries());
+  }, [articles]);
+
+  // Filtrage des articles en fonction de la recherche et de la catégorie
+  const filteredArticles = useMemo(() => {
+    return articles.filter(
+      (article) =>
+        (!selectedCategory || String(article.category?.id) === selectedCategory) &&
+        article.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [articles, selectedCategory, searchQuery]);
+
+  // Configuration du responsive pour la grille Masonry
   const breakpointColumns = {
     default: 3,
     1100: 2,
-    700: 1
+    700: 1,
   };
 
   return (
@@ -33,72 +75,71 @@ export function Articles() {
         <title>Articles - Daily Tips</title>
         <meta name="description" content="Découvrez notre collection d'articles lifestyle." />
       </Helmet>
+
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-6 font-playfair text-center">Articles</h1>
-          
-          {/* Search and Filters */}
-          <div className="space-y-4">
-            <div className="relative max-w-md mx-auto">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                type="text"
-                placeholder="Rechercher un article..."
-                className="pl-10"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            
-            <div className="flex flex-wrap gap-2 justify-center">
-              <Button
-                variant={!selectedCategory ? "default" : "outline"}
-                onClick={() => setSelectedCategory(null)}
-                className="rounded-full"
-              >
-                Tous
-              </Button>
-              {categories.map((category) => (
-                <Button
-                  key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(category)}
-                  className="rounded-full"
-                >
-                  {category}
-                </Button>
-              ))}
-            </div>
-          </div>
+        <h1 className="text-3xl font-bold mb-6 font-playfair text-center">Articles</h1>
+
+        {/* Barre de recherche */}
+        <div className="relative max-w-md mx-auto mb-6">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Input
+            type="text"
+            placeholder="Rechercher un article..."
+            className="pl-10"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={selectedCategory || 'all'}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
+        {/* Filtres de catégories */}
+        <div className="flex flex-wrap gap-2 justify-center mb-6">
+          <Button
+            variant={!selectedCategory ? "default" : "outline"}
+            onClick={() => setSelectedCategory(null)}
+            className="rounded-full"
           >
-            <Masonry
-              breakpointCols={breakpointColumns}
-              className="masonry-grid"
-              columnClassName="masonry-grid_column"
+            Tous
+          </Button>
+          {categories.map(([id, name]) => (
+            <Button
+              key={id}
+              variant={selectedCategory === String(id) ? "default" : "outline"}
+              onClick={() => setSelectedCategory(String(id))}
+              className="rounded-full"
             >
-              {filteredArticles.map((article) => (
-                <div key={article.id} className="masonry-grid_item">
-                  <ArticleCard article={article} />
-                </div>
-              ))}
-            </Masonry>
-            
-            {filteredArticles.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">Aucun article trouvé</p>
-              </div>
-            )}
-          </motion.div>
-        </AnimatePresence>
+              {name}
+            </Button>
+          ))}
+        </div>
+
+        {/* Affichage des articles */}
+        {loading ? (
+          <div className="text-center py-12">Chargement des articles...</div>
+        ) : error ? (
+          <div className="text-center py-12 text-red-500">{error}</div>
+        ) : (
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={selectedCategory || "all"}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Masonry
+                breakpointCols={breakpointColumns}
+                className="masonry-grid"
+                columnClassName="masonry-grid_column"
+              >
+                {filteredArticles.length > 0 ? (
+                  filteredArticles.map((article) => <ArticleCard key={article.id} article={article} />)
+                ) : (
+                  <p className="text-center w-full">Aucun article trouvé.</p>
+                )}
+              </Masonry>
+            </motion.div>
+          </AnimatePresence>
+        )}
       </div>
     </>
   );

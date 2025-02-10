@@ -1,10 +1,13 @@
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
-import { Heart, Coffee, Utensils, Shirt, Smile, Home, Book, Palette } from 'lucide-react';
+import { Heart, Coffee, Utensils, Shirt, Smile, Home, Book, Palette, Plane, DollarSign, Briefcase, Dumbbell, Cpu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios'; // Importer Axios
+import { useEffect, useState } from 'react';
 
 interface Category {
+  id: number;
   name: string;
   icon: React.ReactNode;
   description: string;
@@ -12,71 +15,86 @@ interface Category {
   color: string;
 }
 
-const categories: Category[] = [
-  {
-    name: 'Beauté',
-    icon: <Heart className="h-8 w-8" />,
-    description: 'Conseils beauté et soins naturels',
-    articleCount: 12,
-    color: 'bg-pink-50 text-pink-600 dark:bg-pink-950 dark:text-pink-300'
-  },
-  {
-    name: 'Lifestyle',
-    icon: <Coffee className="h-8 w-8" />,
-    description: 'Art de vivre et quotidien',
-    articleCount: 15,
-    color: 'bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-300'
-  },
-  {
-    name: 'Nutrition',
-    icon: <Utensils className="h-8 w-8" />,
-    description: 'Alimentation saine et recettes',
-    articleCount: 8,
-    color: 'bg-green-50 text-green-600 dark:bg-green-950 dark:text-green-300'
-  },
-  {
-    name: 'Mode',
-    icon: <Shirt className="h-8 w-8" />,
-    description: 'Tendances et conseils mode',
-    articleCount: 10,
-    color: 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-300'
-  },
-  {
-    name: 'Bien-être',
-    icon: <Smile className="h-8 w-8" />,
-    description: 'Santé et développement personnel',
-    articleCount: 14,
-    color: 'bg-yellow-50 text-yellow-600 dark:bg-yellow-950 dark:text-yellow-300'
-  },
-  {
-    name: 'Décoration',
-    icon: <Home className="h-8 w-8" />,
-    description: 'Design d\'intérieur et DIY',
-    articleCount: 9,
-    color: 'bg-orange-50 text-orange-600 dark:bg-orange-950 dark:text-orange-300'
-  },
-  {
-    name: 'Culture',
-    icon: <Book className="h-8 w-8" />,
-    description: 'Livres, films et arts',
-    articleCount: 7,
-    color: 'bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-300'
-  },
-  {
-    name: 'Créativité',
-    icon: <Palette className="h-8 w-8" />,
-    description: 'Projets créatifs et inspiration',
-    articleCount: 11,
-    color: 'bg-teal-50 text-teal-600 dark:bg-teal-950 dark:text-teal-300'
-  }
-];
-
 export function Categories() {
   const navigate = useNavigate();
+  const [categories, setCategories] = useState<Category[]>([]); // State pour stocker les catégories récupérées
+  const [loading, setLoading] = useState<boolean>(true); // État pour gérer le chargement
+  const [error, setError] = useState<string | null>(null); // État pour gérer les erreurs
 
-  const handleCategoryClick = (categoryName: string) => {
-    navigate(`/articles?category=${categoryName}`);
+  // Fonction pour récupérer les catégories du backend
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/categories');
+        console.log(response.data); // Vérifier les données
+  
+        const categoriesWithDetails = response.data.map((category: any) => {
+          const details = getCategoryDetails(category.name);
+          return { 
+            ...category, 
+            icon: details.icon,  // Assigner l'icône
+            color: details.color  // Assigner la couleur
+          };
+        });
+  
+        setCategories(categoriesWithDetails);
+      } catch (err) {
+        setError('Erreur lors du chargement des catégories.');
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchCategories();
+  }, []);
+  
+  
+
+  const getCategoryDetails = (name: string) => {
+    switch (name) {
+      case 'Beauté':
+        return { icon: <Heart className="h-8 w-8" />, color: 'bg-pink-50 text-pink-600 dark:bg-pink-950 dark:text-pink-300' };
+      case 'Voyage':
+        return { icon: <Plane className="h-8 w-8" />, color: 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-300' };
+      case 'Lifestyle':
+        return { icon: <Coffee className="h-8 w-8" />, color: 'bg-yellow-50 text-yellow-600 dark:bg-yellow-950 dark:text-yellow-300' };
+      case 'Nutrition':
+        return { icon: <Utensils className="h-8 w-8" />, color: 'bg-lime-50 text-lime-600 dark:bg-lime-950 dark:text-lime-300' };
+      case 'Mode':
+        return { icon: <Shirt className="h-8 w-8" />, color: 'bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-300' };
+      case 'Bien-être':
+        return { icon: <Smile className="h-8 w-8" />, color: 'bg-teal-50 text-teal-600 dark:bg-teal-950 dark:text-teal-300' };
+      case 'Décoration':
+        return { icon: <Home className="h-8 w-8" />, color: 'bg-orange-50 text-orange-600 dark:bg-orange-950 dark:text-orange-300' };
+      case 'Culture':
+        return { icon: <Book className="h-8 w-8" />, color: 'bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-300' };
+      case 'Créativité':
+        return { icon: <Palette className="h-8 w-8" />, color: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-300' };
+      case 'Finance':
+        return { icon: <DollarSign className="h-8 w-8" />, color: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-300' };
+      case 'Entrepreneuriat':
+        return { icon: <Briefcase className="h-8 w-8" />, color: 'bg-gray-50 text-gray-600 dark:bg-gray-950 dark:text-gray-300' };
+      case 'Sport & Fitness':
+        return { icon: <Dumbbell className="h-8 w-8" />, color: 'bg-cyan-50 text-cyan-600 dark:bg-cyan-950 dark:text-cyan-300' };
+      case 'Technologie':
+        return { icon: <Cpu className="h-8 w-8" />, color: 'bg-sky-50 text-sky-600 dark:bg-sky-950 dark:text-sky-300' };
+      default:
+        return { icon: null, color: 'bg-gray-200 text-gray-600 dark:bg-gray-800 dark:text-gray-300' };
+    }    
   };
+  
+
+  const handleCategoryClick = (categoryId: number) => {
+    navigate(`/articles?category=${categoryId}`);
+  };
+
+  if (loading) {
+    return <div>Chargement des catégories...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
 
   return (
     <>
@@ -93,31 +111,33 @@ export function Categories() {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {categories.map((category, index) => (
+          {categories.map((category) => (
             <motion.div
-              key={category.name}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-              onClick={() => handleCategoryClick(category.name)}
-            >
-              <Card className="h-full hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer">
-                <CardContent className="p-6">
-                  <div className={`inline-flex p-3 rounded-xl mb-4 ${category.color}`}>
-                    {category.icon}
-                  </div>
-                  <h3 className="text-xl font-playfair font-semibold mb-2">
-                    {category.name}
-                  </h3>
-                  <p className="text-muted-foreground mb-4">
-                    {category.description}
-                  </p>
-                  <div className="text-sm text-muted-foreground">
-                    {category.articleCount} articles
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+            key={category.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            onClick={() => handleCategoryClick(category.id)}
+          >
+            <Card className="h-full hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+              <CardContent className="p-6">
+                {/* 🔴 Vérifie que la classe `category.color` est bien appliquée */}
+                <div className={`inline-flex p-3 rounded-xl mb-4 ${category.color}`}>
+                  {category.icon} {/* 🔥 S'assurer que c'est bien un élément React et non un objet */}
+                </div>
+                <h3 className="text-xl font-playfair font-semibold mb-2">
+                  {category.name}
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  {category.description}
+                </p>
+                <div className="text-sm text-muted-foreground">
+                  {category.articleCount} articles
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+          
           ))}
         </div>
       </div>

@@ -3,13 +3,12 @@ import { Helmet } from 'react-helmet-async';
 import { Button } from '../components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Article } from '@/data/articles';
 import axios from 'axios';
 
 export function ArticleDetail() {
   const { id } = useParams<{ id: string }>(); // Récupération de l'ID depuis l'URL
   const navigate = useNavigate();
-  const [article, setArticle] = useState<Article | null>(null);
+  const [article, setArticle] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,7 +25,7 @@ export function ArticleDetail() {
     };
 
     fetchArticle();
-  }, [id]); // Déclencher l'effet lorsqu'on change d'article
+  }, [id]);
 
   if (loading) {
     return <div className="text-center py-12">Chargement de l'article...</div>;
@@ -40,7 +39,7 @@ export function ArticleDetail() {
     <>
       <Helmet>
         <title>{article.title} - Daily Tips</title>
-        <meta name="description" content={article.excerpt} />
+        <meta name="description" content={article.excerpt || article.content} />
       </Helmet>
       <div className="container mx-auto px-4 py-8">
         <Button variant="ghost" className="mb-6" onClick={() => navigate(-1)}>
@@ -57,7 +56,18 @@ export function ArticleDetail() {
             {article.category_id} • {new Date(article.updated_at).toLocaleDateString()}
           </div>
           <h1 className="text-4xl font-playfair font-bold mb-6">{article.title}</h1>
-          <div className="prose prose-lg max-w-none">{article.content}</div>
+
+          <p>{article.content}</p>
+          {/* Affichage des sections détaillées de l'article */}
+          <div className="prose prose-lg max-w-none">
+            {article.ArticleContents?.map((section: any, index: number) => (
+              <div key={index} className="mb-8">
+                {section.sectionTitle && <h2 className="text-2xl font-semibold mb-4">{section.sectionTitle}</h2>}
+                {section.imageUrl && <img src={section.imageUrl} alt={section.sectionTitle} className="mb-4" />}
+                <p>{section.content}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </>

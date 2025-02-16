@@ -23,7 +23,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
             {article.category?.name || "Catégorie inconnue"}
           </div>
           <h3 className="text-lg font-playfair font-semibold mb-2">{article.title}</h3>
-          
+
           {/* Affichage du contenu de l'article */}
           <p className="text-muted-foreground text-sm line-clamp-3">{article.content}</p>
         </CardContent>

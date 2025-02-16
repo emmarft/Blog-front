@@ -18,7 +18,7 @@ export function AppRoutes() {
         <Route path="/article/:id" element={<ArticleDetail />} />
         <Route path="/categories" element={<Categories />} />
         <Route path="/auth" element={<Auth />} />
-        
+
         <Route element={<ProtectedRoute />}>
           <Route path="/profile" element={<Profile />} />
         </Route>

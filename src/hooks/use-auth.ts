@@ -1,4 +1,6 @@
-import create from 'zustand';
+import axios from 'axios';
+import { create } from 'zustand';
+import { jwtDecode } from "jwt-decode";
 
 interface User {
   id: string;
@@ -23,13 +25,24 @@ export const useAuth = create<AuthState>((set, get) => ({
   signIn: async (email: string, password: string) => {
     set({ isLoading: true });
     try {
-      // Simuler une authentification avec différents rôles
+      const response = await axios.post('http://127.0.0.1:3000/login', { email, password });
+
+      const { token } = response.data;
+      if (!token) {
+        throw new Error('Token manquant dans la réponse');
+      }
+
+      localStorage.setItem('authToken', token);
+
+      const decodedUser: any = jwtDecode(token);
+
       const mockUser: User = {
-        id: '1',
-        name: 'Jane Doe',
-        email,
-        role: email.includes('admin') ? 'admin' : email.includes('editor') ? 'editor' : 'user',
+        id: decodedUser.userId || decodedUser.sub || 'unknown', // Ajuste selon la structure du token
+        name: decodedUser.name || decodedUser.email,
+        email: decodedUser.email,
+        role: decodedUser.role || 'user', // Valeur par défaut
       };
+
       set({ user: mockUser, isAuthenticated: true });
     } catch (error) {
       console.error('Authentication error:', error);
@@ -38,7 +51,10 @@ export const useAuth = create<AuthState>((set, get) => ({
       set({ isLoading: false });
     }
   },
+
   signOut: () => {
+    // Supprimer le token du localStorage
+    localStorage.removeItem('authToken');
     set({ user: null, isAuthenticated: false });
   },
   hasAccess: (roles: string[]) => {
@@ -46,4 +62,6 @@ export const useAuth = create<AuthState>((set, get) => ({
     if (!user) return false;
     return roles.includes(user.role);
   },
+
 }));
+

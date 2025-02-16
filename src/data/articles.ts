@@ -6,7 +6,7 @@ export interface Article {
   image_url: string;
   category_id: string;
   updated_at: string;
-  category: { 
+  category: {
     id: number;
     name: string;
   };

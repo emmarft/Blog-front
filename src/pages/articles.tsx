@@ -1,25 +1,37 @@
 import { Helmet } from "react-helmet-async";
 import { useEffect, useState, useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom"; 
 import { ArticleCard } from "../components/article-card";
 import Masonry from "react-masonry-css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Article } from "@/data/articles";
+import { Article } from "@/data/articles"; 
 import axios from "axios";
 
+const useQuery = () => {
+  return new URLSearchParams(useLocation().search);
+};
+
 export function Articles() {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const navigate = useNavigate(); 
+  const query = useQuery();
+  const categoryIdFromUrl = query.get("category");
+  const categoryNameFromUrl = query.get("categoryName");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(categoryIdFromUrl);
+  const [selectedCategoryName, setSelectedCategoryName] = useState<string | null>(decodeURIComponent(categoryNameFromUrl || 'Tous'));
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
 
-  // Fonction pour récupérer les articles
   const fetchArticles = async () => {
+    setLoading(true); 
+    setError(null); // Réinitialiser les erreurs
     try {
-      const response = await axios.get("http://localhost:3000/articles");
+      const url = categoryIdFromUrl ? `http://localhost:3000/articles?category=${categoryIdFromUrl}` : "http://localhost:3000/articles";
+      const response = await axios.get(url);
 
       if (Array.isArray(response.data)) {
         const formattedArticles = response.data.map((article: any) => ({
@@ -40,9 +52,8 @@ export function Articles() {
 
   useEffect(() => {
     fetchArticles();
-  }, []);
+  }, [categoryIdFromUrl]);
 
-  // Création d'une liste unique des catégories
   const categories = useMemo(() => {
     const categoryMap = new Map<number, string>();
     articles.forEach((article) => {
@@ -53,16 +64,14 @@ export function Articles() {
     return Array.from(categoryMap.entries());
   }, [articles]);
 
-  // Filtrage des articles en fonction de la recherche et de la catégorie
   const filteredArticles = useMemo(() => {
     return articles.filter(
       (article) =>
-        (!selectedCategory || String(article.category?.id) === selectedCategory) &&
+        (!categoryIdFromUrl || String(article.category?.id) === categoryIdFromUrl) &&
         article.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [articles, selectedCategory, searchQuery]);
+  }, [articles, categoryIdFromUrl, searchQuery]);
 
-  // Configuration du responsive pour la grille Masonry
   const breakpointColumns = {
     default: 3,
     1100: 2,
@@ -79,7 +88,6 @@ export function Articles() {
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6 font-playfair text-center">Articles</h1>
 
-        {/* Barre de recherche */}
         <div className="relative max-w-md mx-auto mb-6">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
@@ -91,11 +99,14 @@ export function Articles() {
           />
         </div>
 
-        {/* Filtres de catégories */}
         <div className="flex flex-wrap gap-2 justify-center mb-6">
           <Button
-            variant={!selectedCategory ? "default" : "outline"}
-            onClick={() => setSelectedCategory(null)}
+            variant={!categoryIdFromUrl ? "default" : "outline"}
+            onClick={() => {
+              setSelectedCategory(null);
+              setSelectedCategoryName("Tous");
+              navigate('/articles');
+            }}
             className="rounded-full"
           >
             Tous
@@ -103,8 +114,12 @@ export function Articles() {
           {categories.map(([id, name]) => (
             <Button
               key={id}
-              variant={selectedCategory === String(id) ? "default" : "outline"}
-              onClick={() => setSelectedCategory(String(id))}
+              variant={categoryIdFromUrl === String(id) ? "default" : "outline"}
+              onClick={() => {
+                setSelectedCategory(String(id));
+                setSelectedCategoryName(name);
+                navigate(`/articles?category=${id}&categoryName=${encodeURIComponent(name)}`);
+              }}
               className="rounded-full"
             >
               {name}
@@ -112,7 +127,6 @@ export function Articles() {
           ))}
         </div>
 
-        {/* Affichage des articles */}
         {loading ? (
           <div className="text-center py-12">Chargement des articles...</div>
         ) : error ? (
@@ -125,6 +139,7 @@ export function Articles() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
+              style={{ minHeight: '300px' }}
             >
               <Masonry
                 breakpointCols={breakpointColumns}

@@ -5,7 +5,8 @@ import { motion } from 'framer-motion';
 
 export function Layout() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col"
+        style={{minHeight: "120vh"}}>
       <Header />
       <motion.main 
         className="flex-grow"

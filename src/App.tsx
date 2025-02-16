@@ -3,6 +3,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from './components/ui/sonner';
 import { AppRoutes } from './routes';
 import { ThemeProvider } from './components/theme-provider';
+import EditorJS from '@editorjs/editorjs';
 
 function App() {
   return (

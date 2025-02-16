@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Heart, Coffee, Utensils, Shirt, Smile, Home, Book, Palette, Plane, DollarSign, Briefcase, Dumbbell, Cpu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; // Importer Axios
+import axios from 'axios'; 
 import { useEffect, useState } from 'react';
 
 interface Category {
@@ -17,26 +17,25 @@ interface Category {
 
 export function Categories() {
   const navigate = useNavigate();
-  const [categories, setCategories] = useState<Category[]>([]); // State pour stocker les catégories récupérées
-  const [loading, setLoading] = useState<boolean>(true); // État pour gérer le chargement
-  const [error, setError] = useState<string | null>(null); // État pour gérer les erreurs
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Fonction pour récupérer les catégories du backend
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await axios.get('http://localhost:3000/categories');
-        console.log(response.data); // Vérifier les données
-  
+        console.log(response.data);
+
         const categoriesWithDetails = response.data.map((category: any) => {
           const details = getCategoryDetails(category.name);
-          return { 
-            ...category, 
-            icon: details.icon,  // Assigner l'icône
-            color: details.color  // Assigner la couleur
+          return {
+            ...category,
+            icon: details.icon,
+            color: details.color
           };
         });
-  
+
         setCategories(categoriesWithDetails);
       } catch (err) {
         setError('Erreur lors du chargement des catégories.');
@@ -44,11 +43,9 @@ export function Categories() {
         setLoading(false);
       }
     };
-  
+
     fetchCategories();
   }, []);
-  
-  
 
   const getCategoryDetails = (name: string) => {
     switch (name) {
@@ -80,12 +77,11 @@ export function Categories() {
         return { icon: <Cpu className="h-8 w-8" />, color: 'bg-sky-50 text-sky-600 dark:bg-sky-950 dark:text-sky-300' };
       default:
         return { icon: null, color: 'bg-gray-200 text-gray-600 dark:bg-gray-800 dark:text-gray-300' };
-    }    
+    }
   };
-  
 
-  const handleCategoryClick = (categoryId: number) => {
-    navigate(`/articles?category=${categoryId}`);
+  const handleCategoryClick = (categoryId: number, categoryName: string) => {
+    navigate(`/articles?category=${categoryId}&categoryName=${encodeURIComponent(categoryName)}`); // Encode category name
   };
 
   if (loading) {
@@ -109,38 +105,38 @@ export function Categories() {
             Explorez nos différentes catégories et trouvez l'inspiration qui vous correspond
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {categories.map((category) => (
             <motion.div
-            key={category.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            onClick={() => handleCategoryClick(category.id)}
-          >
-            <Card className="h-full hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer">
-              <CardContent className="p-6">
-                {/* 🔴 Vérifie que la classe `category.color` est bien appliquée */}
-                <div className={`inline-flex p-3 rounded-xl mb-4 ${category.color}`}>
-                  {category.icon} {/* 🔥 S'assurer que c'est bien un élément React et non un objet */}
-                </div>
-                <h3 className="text-xl font-playfair font-semibold mb-2">
-                  {category.name}
-                </h3>
-                <p className="text-muted-foreground mb-4">
-                  {category.description}
-                </p>
-                <div className="text-sm text-muted-foreground">
-                  {category.articleCount} articles
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-          
+              key={category.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              onClick={() => handleCategoryClick(category.id, category.name)} // Pass category name
+            >
+              <Card className="h-full hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+                <CardContent className="p-6">
+                  <div className={`inline-flex p-3 rounded-xl mb-4 ${category.color}`}>
+                    {category.icon}
+                  </div>
+                  <h3 className="text-xl font-playfair font-semibold mb-2">
+                    {category.name}
+                  </h3>
+                  <p className="text-muted-foreground mb-4">
+                    {category.description}
+                  </p>
+                  <div className="text-sm text-muted-foreground">
+                    {category.articleCount} articles
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
         </div>
       </div>
     </>
   );
 }
+
+

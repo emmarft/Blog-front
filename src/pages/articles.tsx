@@ -1,13 +1,13 @@
 import { Helmet } from "react-helmet-async";
 import { useEffect, useState, useMemo } from "react";
-import { useLocation, useNavigate } from "react-router-dom"; 
+import { useLocation, useNavigate } from "react-router-dom";
 import { ArticleCard } from "../components/article-card";
 import Masonry from "react-masonry-css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Article } from "@/data/articles"; 
+import { Article } from "@/data/articles";
 import axios from "axios";
 
 const useQuery = () => {
@@ -15,7 +15,7 @@ const useQuery = () => {
 };
 
 export function Articles() {
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const query = useQuery();
   const categoryIdFromUrl = query.get("category");
   const categoryNameFromUrl = query.get("categoryName");
@@ -27,7 +27,7 @@ export function Articles() {
   const [articles, setArticles] = useState<Article[]>([]);
 
   const fetchArticles = async () => {
-    setLoading(true); 
+    setLoading(true);
     setError(null); // Réinitialiser les erreurs
     try {
       const url = categoryIdFromUrl ? `http://localhost:3000/articles?category=${categoryIdFromUrl}` : "http://localhost:3000/articles";
@@ -125,6 +125,10 @@ export function Articles() {
               {name}
             </Button>
           ))}
+        </div>
+        
+        <div className="text-center mb-6">
+          <span className="text-xl font-medium">Catégorie : {selectedCategoryName}</span>
         </div>
 
         {loading ? (

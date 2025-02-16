@@ -74,6 +74,22 @@ export function Dashboard() {
   });
 
   useEffect(() => {
+    if (selectedArticle) {
+      setFormData({
+        id: selectedArticle.id,
+        title: selectedArticle.title,
+        excerpt: selectedArticle.excerpt,
+        content: selectedArticle.content,
+        category: selectedArticle.category,
+        image: selectedArticle.image,
+        updated_at: selectedArticle.updated_at,
+        category_id: selectedArticle.category_id,
+      });
+    }
+  }, [selectedArticle]);
+
+
+  useEffect(() => {
     const fetchArticles = async () => {
       try {
         const response = await fetch('http://localhost:3000/articles');

@@ -17,10 +17,8 @@ const useQuery = () => {
 export function Articles() {
   const navigate = useNavigate();
   const query = useQuery();
-  const categoryIdFromUrl = query.get("category");
-  const categoryNameFromUrl = query.get("categoryName");
+  const categoryIdFromUrl = query.get("category"); // On garde juste le categoryId depuis l'URL
   const [selectedCategory, setSelectedCategory] = useState<string | null>(categoryIdFromUrl);
-  const [selectedCategoryName, setSelectedCategoryName] = useState<string | null>(decodeURIComponent(categoryNameFromUrl || 'Tous'));
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -104,7 +102,6 @@ export function Articles() {
             variant={!categoryIdFromUrl ? "default" : "outline"}
             onClick={() => {
               setSelectedCategory(null);
-              setSelectedCategoryName("Tous");
               navigate('/articles');
             }}
             className="rounded-full"
@@ -117,8 +114,7 @@ export function Articles() {
               variant={categoryIdFromUrl === String(id) ? "default" : "outline"}
               onClick={() => {
                 setSelectedCategory(String(id));
-                setSelectedCategoryName(name);
-                navigate(`/articles?category=${id}&categoryName=${encodeURIComponent(name)}`);
+                navigate(`/articles?category=${id}`);
               }}
               className="rounded-full"
             >
@@ -126,10 +122,6 @@ export function Articles() {
             </Button>
           ))}
         </div>
-
-        {/*<div className="text-center mb-6">
-          <span className="text-xl font-medium">Catégorie : {selectedCategoryName}</span>
-        </div>*/}
 
         {loading ? (
           <div className="text-center py-12">Chargement des articles...</div>

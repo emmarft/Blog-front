@@ -1,11 +1,17 @@
 import * as React from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons';
-import { DayPicker } from 'react-day-picker';
+import { DayPicker, CustomComponents } from 'react-day-picker';
 
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
+
+// Étendre le type CustomComponents
+interface CustomComponentsWithIcons extends CustomComponents {
+  IconLeft?: React.ComponentType<any>;
+  IconRight?: React.ComponentType<any>;
+}
 
 function Calendar({
   className,
@@ -58,9 +64,9 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: ({ ...props }) => <ChevronLeftIcon className="h-4 w-4" />,
-        IconRight: ({ ...props }) => <ChevronRightIcon className="h-4 w-4" />,
-      }}
+        IconLeft: (_props) => <ChevronLeftIcon className="h-4 w-4" />,
+        IconRight: (_props) => <ChevronRightIcon className="h-4 w-4" />,
+      } as CustomComponentsWithIcons}  // Utilise l'interface étendue ici
       {...props}
     />
   );

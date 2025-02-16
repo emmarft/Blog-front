@@ -10,13 +10,15 @@ export function Header() {
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-4">
-        <nav className="flex items-center justify-between">
+        <nav className="flex items-center justify-between w-full px-4">
+          {/* Logo à gauche */}
           <Link to="/" className="flex items-center space-x-2">
             <Heart className="h-6 w-6 text-primary-foreground" />
             <span className="font-playfair text-xl font-semibold">Daily Tips</span>
           </Link>
 
-          <div className="hidden md:flex items-center space-x-6">
+          {/* Liens centrés */}
+          <div className="flex items-center space-x-6 mx-auto">
             <Link to="/" className="text-sm font-medium hover:text-primary-foreground transition-colors">
               Home
             </Link>
@@ -28,6 +30,7 @@ export function Header() {
             </Link>
           </div>
 
+          {/* Boutons à droite */}
           <div className="flex items-center space-x-4">
             <ModeToggle />
             {isAuthenticated ? (
@@ -37,11 +40,19 @@ export function Header() {
                 </Button>
               </Link>
             ) : (
-              <Link to="/auth">
-                <Button variant="default" size="sm">
-                  Sign In
-                </Button>
-              </Link>
+              <>
+                <Link to="/register">
+                  <Button variant="default" size="sm">
+                    Sign Up
+                  </Button>
+                </Link>
+
+                <Link to="/auth">
+                  <Button variant="default" size="sm">
+                    Sign In
+                  </Button>
+                </Link>
+              </>
             )}
           </div>
         </nav>

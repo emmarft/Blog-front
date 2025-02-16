@@ -127,9 +127,9 @@ export function Articles() {
           ))}
         </div>
 
-        <div className="text-center mb-6">
+        {/*<div className="text-center mb-6">
           <span className="text-xl font-medium">Catégorie : {selectedCategoryName}</span>
-        </div>
+        </div>*/}
 
         {loading ? (
           <div className="text-center py-12">Chargement des articles...</div>

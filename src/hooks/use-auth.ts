@@ -2,6 +2,7 @@ import axios from 'axios';
 import { create } from 'zustand';
 import { jwtDecode } from "jwt-decode";
 
+
 interface User {
   id: string;
   name: string;
@@ -14,6 +15,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
   signOut: () => void;
   hasAccess: (roles: string[]) => boolean;
 }
@@ -25,7 +27,9 @@ export const useAuth = create<AuthState>((set, get) => ({
   signIn: async (email: string, password: string) => {
     set({ isLoading: true });
     try {
+      console.log("Tentative de connexion avec:", { email, password });
       const response = await axios.post('http://192.168.1.103:3000/login', { email, password });
+      console.log("Réponse du serveur:", response.data);
 
       const { token } = response.data;
       if (!token) {
@@ -33,7 +37,6 @@ export const useAuth = create<AuthState>((set, get) => ({
       }
 
       localStorage.setItem('authToken', token);
-
       const decodedUser: any = jwtDecode(token);
 
       const mockUser: User = {
@@ -45,7 +48,41 @@ export const useAuth = create<AuthState>((set, get) => ({
 
       set({ user: mockUser, isAuthenticated: true });
     } catch (error) {
-      console.error('Authentication error:', error);
+      console.error('Erreur lors de la connexion:', error); // Affiche l'erreur pour le débogage
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  signUp: async (email: string, password: string) => {
+    set({ isLoading: true });
+    try {
+      const response = await axios.post('http://192.168.1.103:3000/register', { email, password });
+
+      const { token } = response.data;
+      if (!token) {
+        throw new Error('Token manquant dans la réponse');
+      }
+
+      localStorage.setItem('authToken', token);
+
+      const decodedUser: any = jwtDecode(token);
+
+      const newUser: User = {
+        id: decodedUser.userId || decodedUser.sub || 'unknown',
+        name: decodedUser.name || decodedUser.email,
+        email: decodedUser.email,
+        role: decodedUser.role || 'user',
+      };
+
+      set({ user: newUser, isAuthenticated: true });
+
+      // Optionnel : Ajouter l'en-tête d'autorisation à toutes les requêtes
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+    } catch (error) {
+      console.error('Registration error:', error);
       throw error;
     } finally {
       set({ isLoading: false });

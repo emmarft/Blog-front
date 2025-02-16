@@ -5,6 +5,7 @@ import { Articles } from '../pages/articles';
 import { ArticleDetail } from '../pages/article-detail';
 import { Categories } from '../pages/categories';
 import { Auth } from '../pages/auth';
+import { Register } from '@/pages/register';
 import { Profile } from '../pages/profile';
 import { Dashboard } from '../pages/dashboard';
 import { ProtectedRoute } from '../components/protected-route';
@@ -18,6 +19,7 @@ export function AppRoutes() {
         <Route path="/article/:id" element={<ArticleDetail />} />
         <Route path="/categories" element={<Categories />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/register" element={<Register />} />
 
         <Route element={<ProtectedRoute />}>
           <Route path="/profile" element={<Profile />} />

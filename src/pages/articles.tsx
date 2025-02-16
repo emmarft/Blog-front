@@ -28,7 +28,11 @@ export function Articles() {
     setLoading(true);
     setError(null); // Réinitialiser les erreurs
     try {
-      const url = categoryIdFromUrl ? `http://192.168.1.103:3000/articles?category=${categoryIdFromUrl}` : "http://192.168.1.103:3000/articles";
+      const url = categoryIdFromUrl ? 
+      `http://192.168.1.103:3000/articles?category=${categoryIdFromUrl}` 
+      : 
+      "http://192.168.1.103:3000/articles";
+      
       const response = await axios.get(url);
 
       if (Array.isArray(response.data)) {

@@ -25,7 +25,7 @@ export const useAuth = create<AuthState>((set, get) => ({
   signIn: async (email: string, password: string) => {
     set({ isLoading: true });
     try {
-      const response = await axios.post('http://127.0.0.1:3000/login', { email, password });
+      const response = await axios.post('http://192.168.1.103:3000/login', { email, password });
 
       const { token } = response.data;
       if (!token) {

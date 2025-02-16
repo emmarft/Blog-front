@@ -16,8 +16,9 @@ export function Home() {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const response = await axios.get('http://192.168.1.103:3000/articles');
-
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://192.168.1.103:3000'; // Utilisation de la variable d'environnement
+        const response = await axios.get(`${apiUrl}/articles`);
+        
         // Vérification et assignation d'une catégorie par défaut
         const validArticles = response.data.map((article: Article) => ({
           ...article,

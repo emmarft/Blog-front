@@ -1,6 +1,5 @@
 import { Outlet } from 'react-router-dom';
 import { Header } from './header';
-import { Footer } from './footer';
 import { motion } from 'framer-motion';
 
 export function Layout() {

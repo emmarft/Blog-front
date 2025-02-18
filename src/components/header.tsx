@@ -17,7 +17,6 @@ export function Header() {
             <span className="font-playfair text-xl font-semibold">Daily Tips</span>
           </Link>
 
-          {/* Liens centrés */}
           <div className="flex items-center space-x-6 mx-auto">
             <Link to="/" className="text-sm font-medium hover:text-primary-foreground transition-colors">
               Home

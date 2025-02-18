@@ -92,7 +92,7 @@ export function Dashboard() {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const response = await fetch('http://192.168.1.103:3000/articles');
+        const response = await fetch('http://82.66.147.237:3000/articles');
 
         if (!response.ok) {
           throw new Error('Erreur lors de la récupération des articles');

@@ -16,7 +16,7 @@ export function Home() {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://192.168.1.103:3000'; // Utilisation de la variable d'environnement
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://82.66.147.237:3000'; // Utilisation de la variable d'environnement
         const response = await axios.get(`${apiUrl}/articles`);
         
         // Vérification et assignation d'une catégorie par défaut

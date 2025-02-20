@@ -28,7 +28,7 @@ export const useAuth = create<AuthState>((set, get) => ({
     set({ isLoading: true });
     try {
       console.log("Tentative de connexion avec:", { email, password });
-      const response = await axios.post('http://192.168.1.103:3000/login', { email, password });
+      const response = await axios.post('http://82.66.147.237:3000/login', { email, password });
       console.log("Réponse du serveur:", response.data);
 
       const { token } = response.data;
@@ -58,7 +58,7 @@ export const useAuth = create<AuthState>((set, get) => ({
   signUp: async (email: string, password: string) => {
     set({ isLoading: true });
     try {
-      const response = await axios.post('http://192.168.1.103:3000/register', { email, password });
+      const response = await axios.post('http://82.66.147.237:3000/register', { email, password });
 
       const { token } = response.data;
       if (!token) {

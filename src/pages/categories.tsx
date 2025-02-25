@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Heart, Coffee, Utensils, Shirt, Smile, Home, Book, Palette, Plane, DollarSign, Briefcase, Dumbbell, Cpu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; 
+import axios from 'axios';
 import { useEffect, useState } from 'react';
 
 interface Category {
@@ -21,10 +21,13 @@ export function Categories() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const isLocal = ["localhost", "192.168.1.103"].includes(window.location.hostname);
+  const API_URL = isLocal ? import.meta.env.VITE_BACKEND_URL : import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('http://82.66.147.237:3000/categories');
+        const response = await axios.get(`${API_URL}/categories`);
         console.log(response.data);
 
         const categoriesWithDetails = response.data.map((category: any) => {

@@ -35,7 +35,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { toast } from 'sonner';
 
 interface Article {
-  id?: string; 
+  id?: string;
   title: string;
   excerpt: string;
   content: string;
@@ -69,9 +69,12 @@ export function Dashboard() {
     content: '',
     category: '',
     image: '',
-    updated_at: '', 
+    updated_at: '',
     category_id: '',
   });
+
+  const isLocal = ["localhost", "192.168.1.103"].includes(window.location.hostname);
+  const API_URL = isLocal ? import.meta.env.VITE_BACKEND_URL : import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     if (selectedArticle) {
@@ -92,7 +95,7 @@ export function Dashboard() {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const response = await fetch('http://82.66.147.237:3000/articles');
+        const response = await fetch(`${API_URL}/articles`);
 
         if (!response.ok) {
           throw new Error('Erreur lors de la récupération des articles');
@@ -102,7 +105,7 @@ export function Dashboard() {
         const validArticles = data.map((article: Article) => ({
           ...article,
           category: article.category?.name || 'Catégorie inconnue',
-          image: article.image_url, 
+          image: article.image_url,
         }));
 
         setArticles(validArticles);
@@ -129,11 +132,11 @@ export function Dashboard() {
 
   const handleEdit = (article: Article) => {
     const articleFormData: ArticleFormData = {
-      id: article.id, 
+      id: article.id,
       title: article.title,
       content: article.content,
-      category: article.category.name, 
-      image: article.image_url, 
+      category: article.category.name,
+      image: article.image_url,
       updated_at: article.updated_at,
       category_id: article.category_id,
       excerpt: article.excerpt,
@@ -159,12 +162,12 @@ export function Dashboard() {
         throw new Error(errorData.message || 'Failed to update article');
       }
 
-      const updatedArticleData = await response.json(); 
+      const updatedArticleData = await response.json();
 
       const updatedArticle: Article = {
-        ...updatedArticleData, 
-        image_url: updatedArticleData.image || formData.image, 
-        category: { name: formData.category }, 
+        ...updatedArticleData,
+        image_url: updatedArticleData.image || formData.image,
+        category: { name: formData.category },
       };
 
       setArticles(
@@ -198,8 +201,8 @@ export function Dashboard() {
 
       const newArticle: Article = {
         ...newArticleData,
-        image_url: newArticleData.image || formData.image, 
-        category: { name: formData.category }, 
+        image_url: newArticleData.image || formData.image,
+        category: { name: formData.category },
       };
 
       setArticles([...articles, newArticle]);
@@ -208,10 +211,10 @@ export function Dashboard() {
     }
   };
 
-  const handleDelete = (articleId: string | undefined) => { 
+  const handleDelete = (articleId: string | undefined) => {
     if (!articleId) {
       console.error("L'ID de l'article est indéfini.");
-      return; 
+      return;
     }
     toast.success('Article supprimé avec succès !');
     setArticles(articles.filter((article) => article.id === articleId));

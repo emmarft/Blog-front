@@ -9,7 +9,7 @@ import { Settings, FileText, Heart, Bell, LayoutDashboard } from 'lucide-react';
 
 export function Profile() {
   const { user, hasAccess } = useAuth();
-  const canAccessDashboard = hasAccess(['admin', 'editor']);
+  const canAccessDashboard = hasAccess(['admin']);
 
   const savedArticles = [
     { id: '1', title: 'Les meilleurs conseils pour une routine beauté naturelle' },

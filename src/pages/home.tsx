@@ -13,12 +13,14 @@ export function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const isLocal = ["localhost", "192.168.1.103"].includes(window.location.hostname);
+  const API_URL = isLocal ? import.meta.env.VITE_BACKEND_URL : import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://82.66.147.237:3000'; // Utilisation de la variable d'environnement
-        const response = await axios.get(`${apiUrl}/articles`);
-        
+        const response = await axios.get(`${API_URL}/articles`);
+
         // Vérification et assignation d'une catégorie par défaut
         const validArticles = response.data.map((article: Article) => ({
           ...article,

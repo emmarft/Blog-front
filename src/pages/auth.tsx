@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 
 export function Auth() {
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const { signIn, hasAccess } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -19,7 +19,13 @@ export function Auth() {
     try {
       await signIn(email, password);
       toast.success('Connexion réussie !');
-      navigate('/home');
+
+      if (hasAccess(['admin', 'reader'])) {
+        navigate('/profile');
+      }
+      else {
+        navigate('/');
+      }
     } catch (error) {
       toast.error('Erreur de connexion');
     }

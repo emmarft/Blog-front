@@ -24,11 +24,17 @@ export function Articles() {
   const [error, setError] = useState<string | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
 
+  const isLocal = ["localhost", "192.168.1.103"].includes(window.location.hostname);
+  const API_URL = isLocal ? import.meta.env.VITE_BACKEND_URL : import.meta.env.VITE_API_URL;
+  console.log("API_URL utilisée :", API_URL); // Vérification
+
   const fetchArticles = async () => {
     setLoading(true);
     setError(null); // Réinitialiser les erreurs
     try {
-      const url = categoryIdFromUrl ? `http://82.66.147.237:3000/articles?category=${categoryIdFromUrl}` : "http://82.66.147.237:3000/articles";
+      const url = categoryIdFromUrl
+        ? `${API_URL}/articles?category=${categoryIdFromUrl}`
+        : `${API_URL}/articles`;
       const response = await axios.get(url);
 
       if (Array.isArray(response.data)) {

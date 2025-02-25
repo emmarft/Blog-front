@@ -25,7 +25,7 @@ export function AppRoutes() {
           <Route path="/profile" element={<Profile />} />
         </Route>
 
-        <Route element={<ProtectedRoute allowedRoles={['admin', 'editor']} />}>
+        <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
           <Route path="/dashboard" element={<Dashboard />} />
         </Route>
       </Route>

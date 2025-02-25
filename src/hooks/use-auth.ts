@@ -20,8 +20,6 @@ interface AuthState {
   hasAccess: (roles: string[]) => boolean;
 }
 
-const isLocal = ["localhost", "192.168.1.103"].includes(window.location.hostname);
-const API_URL = isLocal ? import.meta.env.VITE_BACKEND_URL : import.meta.env.VITE_API_URL;
 
 export const useAuth = create<AuthState>((set, get) => ({
   user: null,
@@ -31,7 +29,7 @@ export const useAuth = create<AuthState>((set, get) => ({
     set({ isLoading: true });
     try {
       console.log("Tentative de connexion avec:", { email, password });
-      const response = await axios.post(`${API_URL}/login`, { email, password });
+      const response = await axios.post('http://localhost:3000/login', { email, password });
       console.log("Réponse du serveur:", response.data);
 
       const { token } = response.data;
@@ -43,15 +41,15 @@ export const useAuth = create<AuthState>((set, get) => ({
       const decodedUser: any = jwtDecode(token);
 
       const mockUser: User = {
-        id: decodedUser.userId || decodedUser.sub || 'unknown',
+        id: decodedUser.userId || decodedUser.sub || 'unknown', // Ajuste selon la structure du token
         name: decodedUser.name || decodedUser.email,
         email: decodedUser.email,
-        role: decodedUser.role || 'user', 
+        role: decodedUser.role || 'user', // Valeur par défaut
       };
 
       set({ user: mockUser, isAuthenticated: true });
     } catch (error) {
-      console.error('Erreur lors de la connexion:', error);
+      console.error('Erreur lors de la connexion:', error); // Affiche l'erreur pour le débogage
       throw error;
     } finally {
       set({ isLoading: false });
@@ -62,8 +60,8 @@ export const useAuth = create<AuthState>((set, get) => ({
     set({ isLoading: true });
     try {
       const response = await axios.post(
-        `${API_URL}/register`,
-        { email, password }, 
+        "http://localhost:3000/register",
+        { email, password },  // Pas besoin d'envoyer name ici
         { headers: { "Content-Type": "application/json" }, withCredentials: true }
       );
   

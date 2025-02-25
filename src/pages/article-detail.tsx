@@ -12,13 +12,10 @@ export function ArticleDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const isLocal = ["localhost", "192.168.1.103"].includes(window.location.hostname);
-  const API_URL = isLocal ? import.meta.env.VITE_BACKEND_URL : import.meta.env.VITE_API_URL;
-
   useEffect(() => {
     const fetchArticle = async () => {
       try {
-        const response = await axios.get(`${API_URL}/article/${id}`);
+        const response = await axios.get(`http://82.66.147.237:3000/article/${id}`);
         setArticle(response.data);
       } catch (err) {
         setError("Erreur lors du chargement de l'article.");

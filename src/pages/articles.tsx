@@ -24,9 +24,13 @@ export function Articles() {
   const [error, setError] = useState<string | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
 
+  const initialAPI_URL = import.meta.env.VITE_API_URL;
   const isLocal = ["localhost", "192.168.1.103"].includes(window.location.hostname);
-  const API_URL = isLocal ? import.meta.env.VITE_BACKEND_URL : import.meta.env.VITE_API_URL;
-  console.log("API_URL utilisée :", API_URL); // Vérification
+  const API_URL = isLocal ? 'http://backend:3000' : initialAPI_URL;
+
+  console.log("API_URL utilisée :", API_URL);
+
+  // Utilisez API_URL dans votre code existant
 
   const fetchArticles = async () => {
     setLoading(true);

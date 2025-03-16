@@ -33,12 +33,14 @@ import { motion } from 'framer-motion';
 import { PenLine, BarChart2, Users, FileText, Plus, Trash2, Edit, Image } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { toast } from 'sonner';
+import Editor from '@/components/editor';
+import { OutputData } from '@editorjs/editorjs';
 
 interface Article {
-  id?: string; 
+  id?: string;
   title: string;
   excerpt: string;
-  content: string;
+  content: OutputData;
   category: { name: string };
   image_url: string;
   updated_at: string;
@@ -48,7 +50,7 @@ interface Article {
 interface ArticleFormData extends Omit<Article, 'category' | 'image_url'> {
   id?: string;
   title: string;
-  content: string;
+  content: OutputData;
   category: string;
   image: string;
   updated_at: string;
@@ -66,10 +68,10 @@ export function Dashboard() {
   const [formData, setFormData] = useState<ArticleFormData>({
     title: '',
     excerpt: '',
-    content: '',
+    content: { blocks: [] },
     category: '',
     image: '',
-    updated_at: '', 
+    updated_at: '',
     category_id: '',
   });
 
@@ -102,7 +104,7 @@ export function Dashboard() {
         const validArticles = data.map((article: Article) => ({
           ...article,
           category: article.category?.name || 'Catégorie inconnue',
-          image: article.image_url, 
+          image: article.image_url,
         }));
 
         setArticles(validArticles);
@@ -127,13 +129,18 @@ export function Dashboard() {
 
   const categories = ['Beauté', 'Lifestyle', 'Nutrition', 'Mode', 'Bien-être', 'Décoration'];
 
+  const handleEditorChange = (data: OutputData) => {
+    console.log("handleEditorChange appelé");
+    setFormData({ ...formData, content: data });
+  };
+
   const handleEdit = (article: Article) => {
     const articleFormData: ArticleFormData = {
-      id: article.id, 
+      id: article.id,
       title: article.title,
       content: article.content,
-      category: article.category.name, 
-      image: article.image_url, 
+      category: article.category.name,
+      image: article.image_url,
       updated_at: article.updated_at,
       category_id: article.category_id,
       excerpt: article.excerpt,
@@ -151,7 +158,7 @@ export function Dashboard() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, content: JSON.stringify(formData.content) }), // Sérialisez content en JSON
       });
 
       if (!response.ok) {
@@ -159,12 +166,12 @@ export function Dashboard() {
         throw new Error(errorData.message || 'Failed to update article');
       }
 
-      const updatedArticleData = await response.json(); 
+      const updatedArticleData = await response.json();
 
       const updatedArticle: Article = {
-        ...updatedArticleData, 
-        image_url: updatedArticleData.image || formData.image, 
-        category: { name: formData.category }, 
+        ...updatedArticleData,
+        image_url: updatedArticleData.image || formData.image,
+        category: { name: formData.category },
       };
 
       setArticles(
@@ -181,37 +188,47 @@ export function Dashboard() {
 
   const handleCreate = async () => {
     try {
-      const response = await fetch('/api/articles', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+        const token = localStorage.getItem('token');
+        const { user } = useAuth(); // Récupérer l'utilisateur depuis useAuth
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create article');
-      }
+        if (!token) {
+            throw new Error("Token manquant");
+        }
 
-      const newArticleData = await response.json();
+        if (!user || !user.id) {
+            throw new Error("Utilisateur ou ID utilisateur manquant");
+        }
 
-      const newArticle: Article = {
-        ...newArticleData,
-        image_url: newArticleData.image || formData.image, 
-        category: { name: formData.category }, 
-      };
+        const response = await fetch('http://82.66.147.237:3000/articles', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                title: formData.title,
+                content: formData.content,
+                category_id: formData.category_id,
+                user_id: user.id, // Ajouter user_id au corps de la requête
+            }),
+        });
 
-      setArticles([...articles, newArticle]);
+        if (!response.ok) {
+            throw new Error('Erreur lors de la création de l\'article');
+        }
+
+        const newArticle = await response.json();
+        console.log("Article créé avec succès :", newArticle);
     } catch (error) {
-      // ... error handling
+        console.error("Erreur lors de la création de l'article :", error);
     }
-  };
+};
 
-  const handleDelete = (articleId: string | undefined) => { 
+
+  const handleDelete = (articleId: string | undefined) => {
     if (!articleId) {
       console.error("L'ID de l'article est indéfini.");
-      return; 
+      return;
     }
     toast.success('Article supprimé avec succès !');
     setArticles(articles.filter((article) => article.id === articleId));
@@ -246,7 +263,7 @@ export function Dashboard() {
                 Nouvel Article
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
+            <DialogContent className="sm:max-w-[600px] overflow-y-auto max-h-[80vh]">
               <DialogHeader>
                 <DialogTitle>Créer un nouvel article</DialogTitle>
                 <DialogDescription>
@@ -290,12 +307,7 @@ export function Dashboard() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="content">Contenu</Label>
-                  <Textarea
-                    id="content"
-                    value={formData.content}
-                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                    rows={6}
-                  />
+                  <Editor data={formData.content} onChange={handleEditorChange} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="image">URL de l'image</Label>
@@ -461,12 +473,7 @@ export function Dashboard() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-content">Contenu</Label>
-                <Textarea
-                  id="edit-content"
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  rows={6}
-                />
+                <Editor data={formData.content} onChange={handleEditorChange} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-image">URL de l'image</Label>
